@@ -1,0 +1,86 @@
+from flask import Flask, render_template, request, redirect, url_for
+import json
+from calendar_helper import generate_calendar_data  # Updated import statement
+
+from firebase import firebase
+
+firebase = firebase.FirebaseApplication('https://hakctuesx-default-rtdb.firebaseio.com/', None)
+
+#result = firebase.get('/users', None)
+#new_user = 'Dave'
+result = firebase.get('/tasks', None)
+print(result)
+
+app = Flask(__name__)
+
+user = {
+    'name': 'John Doe',
+    'email': 'john@example.com'
+}
+
+@app.route('/login', methods=['GET', 'POST'])
+def login():
+    if request.method == 'POST':
+        username = request.form['username']
+        password = request.form['password']
+        if username == "andrey-shefa":
+            # Redirect to profile page on successful login
+            return redirect(url_for('profile'))
+        else:
+            # Display an error message if login fails
+            error = 'Invalid username or password. Please try again.'
+            return render_template('login.html', error=error)
+    # Render the login page for GET requests
+    return render_template('login.html')
+
+@app.route('/profile')
+def profile():
+    return render_template('profile.html', user=user)
+
+@app.route('/edit_profile', methods=['POST'])
+def edit_profile():
+    user['name'] = request.form['name']
+    user['email'] = request.form['email']
+    return redirect(url_for('profile'))
+
+@app.route('/mentors')
+def mentors():
+    return render_template('mentori.html')
+
+@app.route('/')
+def dashboard():
+    tasks = load_tasks()
+    calendar_data = generate_calendar_data(tasks)
+    return render_template('dashboard.html', tasks=tasks, calendar=calendar_data)
+
+@app.route('/add_task', methods=['POST'])
+def add_task():
+    new_task = {
+        'description': request.form['task'],
+        'deadline': request.form['deadline']
+    }
+    result = firebase.post('/tasks', new_task)  
+    tasks = load_tasks()
+    tasks.append(new_task)
+    save_tasks(tasks)
+    return redirect(url_for('dashboard'))
+
+@app.route('/clear_tasks', methods=['POST'])
+def clear_tasks():
+    save_tasks([])
+    return redirect(url_for('dashboard'))
+
+def load_tasks():
+    try:
+        with open('tasks.json', 'r') as f:
+            tasks = json.load(f)
+    except (json.decoder.JSONDecodeError, FileNotFoundError):
+        tasks = []
+    return tasks
+
+def save_tasks(tasks):
+    with open('tasks.json', 'w') as f:
+        json.dump(tasks, f)
+
+if __name__ == '__main__':
+    app.run(debug=True)
