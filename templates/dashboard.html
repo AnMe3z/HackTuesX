@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Task Dashboard</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <div class="container">
+        <div class="sidebar">
+            <!-- Navigation bar content -->
+        </div>
+        <div class="main-content">
+            <div class="header">
+                <!-- Profile data content -->
+            </div>
+            <div class="chat">
+                <!-- Chat content -->
+            </div>
+            <div class="task-list">
+                <h1>Task Dashboard</h1>
+                <ul>
+                    {% for task in tasks %}
+                        <li>{{ task.description }} - Deadline: {{ task.deadline }}</li>
+                    {% endfor %}
+                </ul>
+                <form action="{{ url_for('add_task') }}" method="post">
+                    <input type="text" name="task" placeholder="Enter task">
+                    <input type="date" name="deadline">
+                    <button type="submit">Add Task</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
