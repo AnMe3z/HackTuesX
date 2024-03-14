@@ -85,11 +85,23 @@ def add_task():
     if 'user' in session:
         task_description = request.form['task']
         task_deadline = request.form['deadline']
+        assignee = request.form['assignee']
+        creator = session['user']
 
-        # Add task to Firebase
-        new_task_ref = firebase.post('/tasks', {'description': task_description, 'deadline': task_deadline})
+        # Check if the current user has the privilege to assign tasks
+        # You can replace this condition with your specific logic
+        if creator == 'admin' or creator == 'head':
+            # Add task to Firebase with creator and assignee
+            new_task_ref = firebase.post('/tasks', {
+                'description': task_description,
+                'deadline': task_deadline,
+                'creator': creator,
+                'assignee': assignee
+            })
 
-        return redirect(url_for('dashboard'))
+            return redirect(url_for('dashboard'))
+        else:
+            return redirect(url_for('dashboard', error='You do not have permission to assign tasks'))
     else:
         return redirect(url_for('login'))
 
@@ -102,8 +114,6 @@ def clear_tasks():
         return redirect(url_for('dashboard'))
     else:
         return redirect(url_for('login'))
-
-from datetime import datetime
 
 @app.route('/send_message', methods=['POST'])
 def send_message():

@@ -37,8 +37,9 @@
             <form action="{{ url_for('add_task') }}" method="post">
                 <input type="text" name="task" placeholder="Enter task">
                 <input type="date" name="deadline">
+                <input type="text" name="assignee" placeholder="Assignee(must not be student)">
                 <button type="submit">Add Task</button>
-            </form>
+            </form>            
             <form action="{{ url_for('clear_tasks') }}" method="post">
                 <button type="submit">Clear All Tasks</button>
             </form>
