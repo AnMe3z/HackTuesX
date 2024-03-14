@@ -1,0 +1,95 @@
+body {
+    font-family: Arial, sans-serif;
+    margin: 0;
+}
+
+.container {
+    display: flex;
+    flex-direction: row;
+    height: 100vh;
+}
+
+.sidebar {
+    flex: 0 0 200px;
+    background-color: #f4f4f4;
+    padding: 20px;
+}
+
+.main-content {
+    flex: 1;
+    padding: 20px;
+}
+
+.profile, .chat {
+    flex: 0 0 300px;
+    background-color: #f4f4f4;
+    padding: 20px;
+}
+
+.profile {
+    position: relative;
+    top: 0;
+    right: 0;
+}
+
+.chat {
+    position: relative;
+    bottom: 0;
+    right: 0;
+}
+
+.task-list {
+    list-style-type: none;
+    padding: 0;
+}
+
+.task-list li {
+    margin-bottom: 20px;
+}
+
+.timeline {
+    list-style-type: none;
+    margin: 0;
+    padding: 0;
+}
+
+.timeline li {
+    padding: 5px 0;
+    border-bottom: 1px solid #ccc;
+}
+
+#calendar {
+    margin-top: 20px;
+}
+#calendar table {
+    width: 100%;
+    border-collapse: collapse;
+}
+#calendar th, #calendar td {
+    border: 1px solid #ccc;
+    padding: 10px;
+    text-align: center;
+}
+#calendar th {
+    background-color: #f2f2f2;
+}
+#calendar td {
+    height: calc(40vh / 8); /* Adjust height based on viewport height and number of rows */
+    max-height: 80px; /* Set a max-height to prevent calendar from taking too much space */
+    overflow-y: auto; /* Add vertical scrollbar if needed */
+}
+
+.chat {
+    margin-top: 20px;
+}
+.chat-box {
+    border: 1px solid #ccc;
+    padding: 10px;
+    height: 200px;
+    overflow-y: auto;
+}
+.chat-input {
+    width: calc(100% - 20px);
+    margin-top: 10px;
+}
+

@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mentor Selection</title>
+    <link rel="stylesheet" href="style_mentors.css">
+
+<style>
+    body {
+        font-family: Arial, sans-serif;
+        margin: 0;
+        padding: 0;
+        background-color: #f4f4f4;
+    }
+
+    .container {
+        max-width: 800px;
+        margin: 20px auto;
+        padding: 20px;
+        background-color: #fff;
+        border-radius: 8px;
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    }
+
+    .mentor {
+        display: flex;
+        align-items: center;
+        border-bottom: 1px solid #ddd;
+        padding: 10px 0;
+    }
+
+    .mentor img {
+        width: 100px;
+        height: 100px;
+        border-radius: 50%;
+        margin-right: 20px;
+    }
+
+    .mentor-info {
+        flex: 1;
+    }
+
+    .mentor-name {
+        font-size: 20px;
+        font-weight: bold;
+        margin-bottom: 5px;
+    }
+
+    .mentor-description {
+        margin-bottom: 10px;
+    }
+
+    .dot {
+        width: 10px;
+        height: 10px;
+        border-radius: 50%;
+        margin-left: auto;
+    }
+
+    .green {
+        background-color: #0f0;
+    }
+
+    .red {
+        background-color: #f00;
+    }
+</style>
+
+</head>
+<body>
+    <div class="container">
+        <div class="mentor">
+            <img src="mentor1.jpg" alt="Mentor 1">
+            <div class="mentor-info">
+                <div class="mentor-name">Cristiano Ronaldo</div>
+                <div class="mentor-description">Bachkam s flask.</div>
+            </div>
+            <div class="dot green"></div>
+        </div>
+        <div class="mentor">
+            <img src="mentor2.jpg" alt="Mentor 2">
+            <div class="mentor-info">
+                <div class="mentor-name">Moe Lester</div>
+                <div class="mentor-description">Ne bachkam s flask.</div>
+            </div>
+            <div class="dot red"></div>
+        </div>
+    </div>
+</body>
+</html>
