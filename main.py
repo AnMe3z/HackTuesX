@@ -1,6 +1,11 @@
 from flask import Flask, render_template, request, redirect, url_for
+#real time
 import pyrebase
+#firestore
+import firebase_admin
+from firebase_admin import credentials, firestore
 
+#pyrebase / realtime
 config = {
 "apiKey": "AIzaSyDY4DLLc_fhTTNqdgpVtRRempnbJzxzob4",
   "authDomain": "hakctuesx.firebaseapp.com",
@@ -13,12 +18,24 @@ config = {
     "databaseURL": "https://hakctuesx-default-rtdb.firebaseio.com/"
 }
 
+#real time database
 firebase = pyrebase.initialize_app(config)
 auth = firebase.auth()
-#real time database
 db = firebase.database()
 data = {"name": "John Doe", "email": "johndoe@example.com"}
 db.push(data)
+
+#firestore database
+cred = credentials.Certificate("hakctuesx-firebase-adminsdk-2u8as-2928acf840.json")
+firebase_admin.initialize_app(cred)
+db = firestore.client()
+#write to firestore database
+doc_ref = db.collection(u'users').document(u'students')
+doc_ref.set({
+    u'first': u'Kur',
+    u'last': u'Lovelace',
+    u'class': u'G'
+})
 
 app = Flask(__name__)
 
