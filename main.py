@@ -1,30 +1,39 @@
-from flask import Flask, render_template
+from flask import Flask, render_template, request, redirect, url_for
+import pyrebase
 
-import firebase_admin
-from firebase_admin import credentials
-from firebase_admin import firestore
+config = {
+"apiKey": "AIzaSyDY4DLLc_fhTTNqdgpVtRRempnbJzxzob4",
+  "authDomain": "hakctuesx.firebaseapp.com",
+  "projectId": "hakctuesx",
+  "storageBucket": "hakctuesx.appspot.com",
+  "messagingSenderId": "618046381097",
+  "appId": "1:618046381097:web:8a02d3cc92838e983cd038",
+  "measurementId": "G-K4JXRH34LB",
 
-cred = credentials.Certificate('hakctuesx-firebase-adminsdk-2u8as-2928acf840.json')
-firebase_admin.initialize_app(cred)
+    "databaseURL": "your-database-url"
+}
+
+firebase = pyrebase.initialize_app(config)
+auth = firebase.auth()
 
 app = Flask(__name__)
 
-db = firestore.client()
-
-@app.route('/login')
+@app.route('/', methods=['GET', 'POST'])
 def login():
+    if request.method == 'POST':
+        email = request.form.get('email')
+        password = request.form.get('password')
+        try:
+            user = auth.sign_in_with_email_and_password(email, password)
+            return redirect(url_for('home'))
+        except:
+            return "Invalid email or password"
     return render_template('login.html')
 
-@app.route('/')
-def hello_world():
-    doc_ref = db.collection(u'users').document(u'students')
-    doc_ref.set({
-        u'first': u'Ada',
-        u'last': u'Lovelace',
-        u'class': u'G'
-    })
-    return 'Hello, World!'
+@app.route('/home')
+def home():
+    return "You are logged in"
 
 if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=8080)
+    app.run(debug=True)
 
