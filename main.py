@@ -10,11 +10,15 @@ config = {
   "appId": "1:618046381097:web:8a02d3cc92838e983cd038",
   "measurementId": "G-K4JXRH34LB",
 
-    "databaseURL": "your-database-url"
+    "databaseURL": "https://hakctuesx-default-rtdb.firebaseio.com/"
 }
 
 firebase = pyrebase.initialize_app(config)
 auth = firebase.auth()
+#real time database
+db = firebase.database()
+data = {"name": "John Doe", "email": "johndoe@example.com"}
+db.push(data)
 
 app = Flask(__name__)
 
