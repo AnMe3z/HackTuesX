@@ -1,2 +1,5 @@
 source myenv/bin/activate
+pip install flask
+pip install firebase-admin
+
 python3 main.py
