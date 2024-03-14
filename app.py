@@ -29,15 +29,10 @@ def login():
         username = request.form['username']
         password = request.form['password']
 
-        # Hardcoded accounts
-        accounts = {
-            'student': 'student',
-            'head': 'head',
-            'admin': 'admin'
-        }
+        # Fetch user credentials from Firebase
+        user_data = firebase.get('/users/' + username, None)
 
-        # Check if the provided credentials match any of the hardcoded accounts
-        if username in accounts and password == accounts[username]:
+        if user_data is not None and password == user_data['password']:
             # Authentication successful
             session['user'] = username
             return redirect(url_for('dashboard'))
@@ -67,11 +62,13 @@ def dashboard():
 
         # Get the current user from the session
         current_user = session['user']
-
+        username = session['user']
+        user_info = firebase.get('/users', username)
+        user_type = user_info.get('user_type')
         # Generate calendar data
         calendar_data = generate_calendar_data(tasks)
 
-        return render_template('dashboard.html', tasks=tasks, calendar=calendar_data, current_user=current_user, messages=messages)
+        return render_template('dashboard.html', tasks=tasks, user_type=user_type, calendar=calendar_data, current_user=current_user, messages=messages)
     else:
         return redirect(url_for('login'))
 
@@ -129,6 +126,31 @@ def send_message():
     else:
         return redirect(url_for('login'))
 
+@app.route('/heads')
+def heads():
+    heads_data = firebase.get('/heads', None)
+    heads_list = []
+    if heads_data:
+        for head, status in heads_data.items():
+            heads_list.append({'name': head, 'status': status})
+
+    return render_template('heads.html', heads=heads_list)
+
+@app.route('/register', methods=['GET'])
+def register_form():
+    return render_template('register.html')
+
+# Route to handle registration form submission
+@app.route('/register', methods=['POST'])
+def register_user():
+    username = request.form['username']
+    password = request.form['password']
+    user_type = request.form['user_type']
+
+    # Write user information to Firebase
+    firebase.put('/users', username, {'password': password, 'user_type': user_type})
+
+    return "User registered successfully."
 
 if __name__ == '__main__':
     app.run(debug=True)

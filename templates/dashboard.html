@@ -14,7 +14,8 @@
             <ul>
                 <li><a href="/">Home</a></li>
                 <li><a href="/edit_profile">Profile</a></li>
-                <li><a href="/mentors">Mentors</a></li>
+                <li><a href="/heads">Available Heads</a></li>
+                <li><a href="/register">Register</a></li>
                 <li><a href="/login">Log in</a></li>
                 <li><a href="/logout">Log out</a></li>
             </ul>
@@ -82,9 +83,10 @@
             <h2>Profile</h2>
             <!-- Display the current user's information -->
             <p>Name: {{ current_user }}</p>
+            <!-- Display the current user's type -->
+            <p>Type: {{ user_type }}</p>
             <!-- You can add more profile data here if needed -->
-        </div>
-        
+        </div>        
         <div class="chat">
             <h2>Chat</h2>
             <div class="chat-box">
