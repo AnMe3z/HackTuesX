@@ -8,14 +8,37 @@ from calendar_helper import generate_calendar_data
 
 from firebase import firebase
 
-# Initialize Flask app
 app = Flask(__name__)
-app.secret_key = '123'  # Set your secret key here
+app.secret_key = 'mlqsqQ1PXL55EhfWEzTl9BBaMr4qy5'  # Set your secret key here
 
-# Initialize Firebase app
 firebase = firebase.FirebaseApplication('https://hakctuesx-default-rtdb.firebaseio.com/', None)
 
-# Routes
+@app.route('/send_message', methods=['POST'])
+def send_message():
+    if 'user' in session:
+        username = session['user']
+        message = request.form['message']
+        timestamp = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+
+        # Push the message to Firebase
+        new_message_ref = firebase.post('/chat/messages', {'user': username, 'message': message, 'timestamp': timestamp})
+
+        return redirect(url_for('dashboard'))
+    else:
+        return redirect(url_for('login'))
+@app.route('/chat')
+
+def chat():
+    # Retrieve chat messages from Firebase
+    messages = firebase.get('/chat/messages', None)
+    if messages is None:
+        messages = []
+    else:
+        messages = [{'user': message['user'], 'message': message['message']} for message in messages.values()]
+
+    # Pass messages to the template and render the chat page
+    return render_template('chat.html', messages=messages)
+
 @app.route('/')
 def index():
     if 'user' in session:
@@ -111,20 +134,6 @@ def clear_tasks():
     else:
         return redirect(url_for('login'))
 
-@app.route('/send_message', methods=['POST'])
-def send_message():
-    if 'user' in session:
-        username = session['user']
-        message = request.form['message']
-        timestamp = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
-
-        # Push the message to Firebase
-        new_message_ref = firebase.post('/chat/messages', {'user': username, 'message': message, 'timestamp': timestamp})
-
-        return redirect(url_for('dashboard'))
-    else:
-        return redirect(url_for('login'))
-
 @app.route('/heads')
 def heads():
     heads_data = firebase.get('/heads', None)
@@ -139,7 +148,6 @@ def heads():
 def register_form():
     return render_template('register.html')
 
-# Route to handle registration form submission
 @app.route('/register', methods=['POST'])
 def register_user():
     username = request.form['username']
@@ -150,6 +158,44 @@ def register_user():
     firebase.put('/users', username, {'password': password, 'user_type': user_type})
 
     return "User registered successfully."
+
+@app.route('/edit_profile')
+def edit_profile():
+    if 'user' in session:
+        username = session['user']
+        user_info = firebase.get('/users', username)
+
+        if user_info is not None:
+            return render_template('edit_profile.html', user_info=user_info)
+        else:
+            # Handle the case where user_info is None (e.g., user not found)
+            return "User information not found."
+    else:
+        return redirect(url_for('login'))
+
+@app.route('/update_profile', methods=['POST'])
+def update_profile():
+    if 'user' in session:
+        username = session['user']
+        user_info = firebase.get('/users', None)
+
+        # Retrieve updated profile data from the form
+        new_password = request.form['password']
+        new_user_type = request.form['user_type']
+
+        # Update user data in Firebase
+        if user_info and username in user_info:
+            updated_user_info = {
+                'password': new_password,
+                'user_type': new_user_type
+            }
+            firebase.patch('/users/' + username, updated_user_info)
+
+            return redirect(url_for('dashboard'))
+        else:
+            return "User not found in database."
+    else:
+        return redirect(url_for('login'))
 
 if __name__ == '__main__':
     app.run(debug=True)

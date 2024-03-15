@@ -4,103 +4,129 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Task Dashboard</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
 </head>
 <body>
-    <div class="container">
-        <div class="sidebar">
-            <h2>Navigation</h2>
-            <!-- Add your navigation links here -->
-            <ul>
-                <li><a href="/">Home</a></li>
-                <li><a href="/edit_profile">Profile</a></li>
-                <li><a href="/heads">Available Heads</a></li>
-                <li><a href="/register">Register</a></li>
-                <li><a href="/login">Log in</a></li>
-                <li><a href="/logout">Log out</a></li>
-            </ul>
-        </div>
-        <div class="main-content">
-            <h1>Task Dashboard</h1>
-            <ul class="task-list">
-                {% for task in tasks %}
-                    <li>
-                        <div>{{ task.description }} - Deadline: {{ task.deadline }}</div>
-                        <!-- Add timeline for checkpoints -->
-                        <ul class="timeline">
-                            {% for checkpoint in task.checkpoints %}
-                                <li>{{ checkpoint.date }} - {{ checkpoint.description }}</li>
+    <div class="container-fluid">
+        <div class="row">
+            <nav class="col-md-3 col-lg-2 d-md-block bg-light sidebar">
+                <div class="sidebar-sticky">
+                    <h5 class="sidebar-heading d-flex justify-content-between align-items-center px-3 mt-4 mb-1 text-muted">
+                        Navigation
+                    </h5>
+                    <ul class="nav flex-column">
+                        <li class="nav-item">
+                            <a class="nav-link" href="/">Home</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="/edit_profile">Edit Profile</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="/heads">Available Heads</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="/register">Register</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="/login">Log in</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="/logout">Log out</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="/chat">Chat</a>
+                        </li>
+                    </ul>
+                </div>
+            </nav>
+
+            <main role="main" class="col-md-9 ml-sm-auto col-lg-10 px-md-4">
+                <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-1 pb-2 mb-3 border-bottom">
+                    <h1 class="h2">Task Dashboard</h1>
+                    <div class="row mt-4">
+                        <div class="col">
+                            <p>{{ current_user }}</p>
+                            <p>{{ user_type }}</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col">
+                        <h2>Tasks</h2>
+                        <ul class="list-group">
+                            {% for task in tasks %}
+                                <li class="list-group-item">{{ task.description }} - Deadline: {{ task.deadline }}</li>
                             {% endfor %}
                         </ul>
-                    </li>
-                {% endfor %}
-            </ul>
-            <form action="{{ url_for('add_task') }}" method="post">
-                <input type="text" name="task_name" placeholder="Enter task name"> <!-- Input field for task name -->
-                <input type="text" name="description" placeholder="Enter task description"> <!-- Input field for description -->
-                <input type="date" name="deadline" placeholder="Enter deadline">
-                <input type="text" name="assignee" placeholder="Enter assignee">
-                <button type="submit">Add Task</button>
-            </form>
-            <form action="{{ url_for('clear_tasks') }}" method="post">
-                <button type="submit">Clear All Tasks</button>
-            </form>
-            <div id="calendar">
-                <h2>Calendar</h2>
-                <table>
-                    <thead>
-                        <tr>
-                            <th>Sun</th>
-                            <th>Mon</th>
-                            <th>Tue</th>
-                            <th>Wed</th>
-                            <th>Thu</th>
-                            <th>Fri</th>
-                            <th>Sat</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {% for week in calendar %}
-                            <tr>
-                                {% for day, tasks in week %}
-                                    <td>
-                                        {% if day %}
-                                            <div>{{ day }}</div>
-                                            <ul>
-                                                {% for task in tasks %}
-                                                    <li>{{ task['description'] }}</li>
-                                                {% endfor %}
-                                            </ul>
-                                        {% endif %}
-                                    </td>
-                                {% endfor %}
-                            </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
-            </div>
+                        <form action="{{ url_for('add_task') }}" method="post" class="mt-3">
+                            <div class="form-group">
+                                <label for="task_name">Task Name</label>
+                                <input type="text" name="task_name" id="task_name" class="form-control" placeholder="Enter task name">
+                            </div>
+                            <div class="form-group">
+                                <label for="description">Description</label>
+                                <input type="text" name="description" id="description" class="form-control" placeholder="Enter task description">
+                            </div>
+                            <div class="form-group">
+                                <label for="deadline">Deadline</label>
+                                <input type="date" name="deadline" id="deadline" class="form-control" placeholder="Enter deadline">
+                            </div>
+                            <div class="form-group">
+                                <label for="assignee">Assignee</label>
+                                <input type="text" name="assignee" id="assignee" class="form-control" placeholder="Enter assignee">
+                            </div>
+                            <button type="submit" class="btn btn-primary">Add Task</button>
+                        </form>
+                        <form action="{{ url_for('clear_tasks') }}" method="post" class="mt-3">
+                            <button type="submit" class="btn btn-danger">Clear All Tasks</button>
+                        </form>
+                    </div>
+
+                    <div class="col">
+                        <div id="calendar">
+                            <h2>Calendar</h2>
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>Sun</th>
+                                        <th>Mon</th>
+                                        <th>Tue</th>
+                                        <th>Wed</th>
+                                        <th>Thu</th>
+                                        <th>Fri</th>
+                                        <th>Sat</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for week in calendar %}
+                                        <tr>
+                                            {% for day, tasks in week %}
+                                                <td>
+                                                    {% if day %}
+                                                        <div>{{ day }}</div>
+                                                        <ul>
+                                                            {% for task in tasks %}
+                                                                <li>{{ task['description'] }}</li>
+                                                            {% endfor %}
+                                                        </ul>
+                                                    {% endif %}
+                                                </td>
+                                            {% endfor %}
+                                        </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                    </div>
+                </div>
+            </main>
         </div>
-        <div class="profile">
-            <h2>Profile</h2>
-            <!-- Display the current user's information -->
-            <p>Name: {{ current_user }}</p>
-            <!-- Display the current user's type -->
-            <p>Type: {{ user_type }}</p>
-            <!-- You can add more profile data here if needed -->
-        </div>        
-        <div class="chat">
-            <h2>Chat</h2>
-            <div class="chat-box">
-                <!-- Display chat messages here -->
-                {% for message in messages %}
-                    <p><strong>{{ message.user }}</strong>: {{ message.message }}</p>
-                {% endfor %}
-            </div>
-            <form action="{{ url_for('send_message') }}" method="post">
-                <input type="text" name="message" placeholder="Type your message...">
-                <button type="submit">Send</button>
-            </form>
-        </div>        
     </div>
+    
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.4/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
 </body>
 </html>
