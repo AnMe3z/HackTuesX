@@ -272,9 +272,6 @@ def submit():
 
             # Push the data to Firebase
             firebase.post('/submissions', data)
-
-            return redirect(url_for('index'))
-
     return render_template('submit.html')
 
 @app.route('/success')
