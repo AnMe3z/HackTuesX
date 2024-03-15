@@ -1,25 +1,27 @@
-from flask import Flask, render_template, request, redirect
-import os
-from werkzeug.utils import secure_filename
+from flask import Flask, request, redirect, url_for, render_template
+import pyrebase
+
+config = {
+    "apiKey": "AIzaSyDY4DLLc_fhTTNqdgpVtRRempnbJzxzob4",
+     "authDomain": "hakctuesx.firebaseapp.com",
+    "databaseURL": "https://hakctuesx-default-rtdb.firebaseio.com/",
+    "storageBucket": "hakctuesx.appspot.com",
+}
+
+firebase = pyrebase.initialize_app(config)
+storage = firebase.storage()
+
 app = Flask(__name__)
 
-@app.route('/')
-def hello_world():
-    return 'Hello, World!'
+@app.route('/submit', methods=['GET', 'POST'])
+def index():
+    if request.method == 'POST':
+        upload = request.files['upload']
+        storage.child("files/" + upload.filename).put(upload)
 
-@app.route('/succes')
-def good():
-   return 'succes'
+        return redirect(url_for('/'))
 
-
-@app.route('/submit',methods=["POST","GET"])
-def submit():
-    if(request.method=="POST"):
-     f = request.files['file']
-     f.save(f.filename)
-     return "file saved succesfully"
-    else: 
-     return render_template('submit.html')
+    return render_template('submit.html')
 
 if __name__ == '__main__':
     app.run(debug=True)
