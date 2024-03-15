@@ -197,5 +197,71 @@ def update_profile():
     else:
         return redirect(url_for('login'))
 
+def populate_available_heads():
+    heads = firebase.get('/heads', None)
+    available_heads = []
+
+    if heads:
+        for head_name, status in heads.items():
+            if status == "free":
+                available_heads.append(head_name)
+
+    print("Available Heads:", available_heads)
+    return available_heads
+
+@app.route('/create_project', methods=['GET', 'POST'])
+def create_project():
+    if request.method == 'POST':
+        # Retrieve form data
+        project_type = request.form.get('project_type')
+        head = request.form.get('head')
+        theme = request.form.get('theme')
+        description = request.form.get('description')
+
+        # Create data dictionary
+        project_data = {
+            'project_type': project_type,
+            'head': head,
+            'theme': theme,
+            'description': description
+        }
+
+        # Save project data to Firebase
+        firebase.post('/projects', project_data)
+        return redirect(url_for('index'))
+
+    # Populate available heads for the form
+    available_heads = populate_available_heads()
+
+    return render_template('createproject.html', available_heads=available_heads)
+
+@app.route('/submit', methods=['GET', 'POST'])
+def submit():
+    if request.method == 'POST':
+        link_to_file = request.form.get('link_to_file')
+        current_user = session.get('user')  # Get the current user from the session
+
+        if current_user:
+            # Get current datetime
+            now = datetime.now()
+            datetime_str = now.strftime("%Y-%m-%d %H:%M:%S")
+
+            data = {
+                'link_to_file': link_to_file,
+                'current_user': current_user,
+                'datetime': datetime_str
+            }
+
+            # Push the data to Firebase
+            firebase.post('/submissions', data)
+
+            return redirect(url_for('index'))
+
+    return render_template('submit.html')
+
+@app.route('/success')
+def success():
+    return "Submission successful! Thank you." 
+
 if __name__ == '__main__':
     app.run(debug=True)
