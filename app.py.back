@@ -1,86 +1,282 @@
-from flask import Flask, render_template, request, redirect, url_for
+from flask import Flask, render_template, request, redirect, url_for, session
 import json
-from calendar_helper import generate_calendar_data  # Updated import statement
+
+from datetime import datetime
+
+import calendar
+from calendar_helper import generate_calendar_data
 
 from firebase import firebase
 
+app = Flask(__name__)
+app.secret_key = 'mlqsqQ1PXL55EhfWEzTl9BBaMr4qy5'  # Set your secret key here
+
 firebase = firebase.FirebaseApplication('https://hakctuesx-default-rtdb.firebaseio.com/', None)
 
-#result = firebase.get('/users', None)
-#new_user = 'Dave'
-result = firebase.get('/tasks', None)
-print(result)
+@app.route('/send_message', methods=['POST'])
+def send_message():
+    if 'user' in session:
+        username = session['user']
+        message = request.form['message']
+        timestamp = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
 
-app = Flask(__name__)
+        # Push the message to Firebase
+        new_message_ref = firebase.post('/chat/messages', {'user': username, 'message': message, 'timestamp': timestamp})
 
-user = {
-    'name': 'John Doe',
-    'email': 'john@example.com'
-}
+        return redirect(url_for('dashboard'))
+    else:
+        return redirect(url_for('login'))
+@app.route('/chat')
+
+def chat():
+    # Retrieve chat messages from Firebase
+    messages = firebase.get('/chat/messages', None)
+    if messages is None:
+        messages = []
+    else:
+        messages = [{'user': message['user'], 'message': message['message']} for message in messages.values()]
+
+    # Pass messages to the template and render the chat page
+    return render_template('chat.html', messages=messages)
+
+@app.route('/')
+def index():
+    if request.method == 'POST':
+        username = request.form['username']
+        password = request.form['password']
+
+        # Fetch user credentials from Firebase
+        user_data = firebase.get('/users/' + username, None)
+
+        if user_data is not None and password == user_data['password']:
+            # Authentication successful
+            session['user'] = username
+            return redirect(url_for('dashboard'))
+        else:
+            # Authentication failed
+            return render_template('login.html', error='Invalid username or password')
+    return render_template('land.html')
+    #if 'user' in session:
+        #return redirect(url_for('dashboard'))
+    #else:
+        #return redirect(url_for('login'))
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
     if request.method == 'POST':
         username = request.form['username']
         password = request.form['password']
-        if username == "andrey-shefa":
-            # Redirect to profile page on successful login
-            return redirect(url_for('profile'))
+
+        # Fetch user credentials from Firebase
+        user_data = firebase.get('/users/' + username, None)
+
+        if user_data is not None and password == user_data['password']:
+            # Authentication successful
+            session['user'] = username
+            return redirect(url_for('dashboard'))
         else:
-            # Display an error message if login fails
-            error = 'Invalid username or password. Please try again.'
-            return render_template('login.html', error=error)
-    # Render the login page for GET requests
-    return render_template('login.html')
+            # Authentication failed
+            return render_template('land.html', error='Invalid username or password')
 
-@app.route('/profile')
-def profile():
-    return render_template('profile.html', user=user)
+    return render_template('land.html')
 
-@app.route('/edit_profile', methods=['POST'])
-def edit_profile():
-    user['name'] = request.form['name']
-    user['email'] = request.form['email']
-    return redirect(url_for('profile'))
-
-@app.route('/mentors')
-def mentors():
-    return render_template('mentori.html')
-
-@app.route('/')
+@app.route('/dashboard')
 def dashboard():
-    tasks = load_tasks()
-    calendar_data = generate_calendar_data(tasks)
-    return render_template('dashboard.html', tasks=tasks, calendar=calendar_data)
+    if 'user' in session:
+        # Fetch tasks from Firebase
+        tasks_data = firebase.get('/tasks', None)
+        tasks = []
 
-@app.route('/add_task', methods=['POST'])
+        if tasks_data:
+            for task_id, task_info in tasks_data.items():
+                task_info['id'] = task_id
+                tasks.append(task_info)
+
+        # Fetch chat messages from Firebase
+        messages_data = firebase.get('/chat/messages', None)
+        messages = []
+
+        if messages_data:
+            for message_id, message_info in messages_data.items():
+                messages.append({'user': message_info['user'], 'message': message_info['message']})
+
+        # Get user information from Firebase
+        current_user = session['user']
+        user_info = firebase.get('/users', current_user)
+        user_type = user_info.get('user_type')
+
+        # Generate calendar data
+        calendar_data = generate_calendar_data(tasks)
+
+        return render_template('dashboard.html', tasks=tasks, user_type=user_type, calendar=calendar_data, current_user=current_user, messages=messages)
+    else:
+        return redirect(url_for('login'))
+
+@app.route('/logout')
+def logout():
+    session.pop('user', None)
+    return redirect(url_for('login'))
+
+@app.route('/add_task', methods=['POST', 'GET'])
 def add_task():
-    new_task = {
-        'description': request.form['task'],
-        'deadline': request.form['deadline']
-    }
-    result = firebase.post('/tasks', new_task)  
-    tasks = load_tasks()
-    tasks.append(new_task)
-    save_tasks(tasks)
-    return redirect(url_for('dashboard'))
+    if 'user' in session:
+        task_name = request.form['task_name']  # Retrieve task name from the form
+        task_description = request.form['description']
+        task_deadline = request.form['deadline']
+        assignee = request.form['assignee']
+        creator = session['user']
+
+        # Add task to Firebase with all attributes
+        new_task_ref = firebase.post('/tasks', {
+            'task_name': task_name,
+            'description': task_description,
+            'deadline': task_deadline,
+            'assignee': assignee,
+            'creator': creator
+        })
+
+        return redirect(url_for('dashboard'))
+    else:
+        return redirect(url_for('login'))
 
 @app.route('/clear_tasks', methods=['POST'])
 def clear_tasks():
-    save_tasks([])
-    return redirect(url_for('dashboard'))
+    if 'user' in session:
+        # Delete all tasks from Firebase
+        firebase.delete('/tasks', None)
 
-def load_tasks():
-    try:
-        with open('tasks.json', 'r') as f:
-            tasks = json.load(f)
-    except (json.decoder.JSONDecodeError, FileNotFoundError):
-        tasks = []
-    return tasks
+        return redirect(url_for('dashboard'))
+    else:
+        return redirect(url_for('login'))
 
-def save_tasks(tasks):
-    with open('tasks.json', 'w') as f:
-        json.dump(tasks, f)
+@app.route('/heads')
+def heads():
+    heads_data = firebase.get('/heads', None)
+    heads_list = []
+    if heads_data:
+        for head, status in heads_data.items():
+            heads_list.append({'name': head, 'status': status})
+
+    return render_template('heads.html', heads=heads_list)
+
+@app.route('/register', methods=['GET'])
+def register_form():
+    return render_template('register.html')
+
+@app.route('/register', methods=['POST'])
+def register_user():
+    username = request.form['username']
+    password = request.form['password']
+    user_type = request.form['user_type']
+
+    # Write user information to Firebase
+    firebase.put('/users', username, {'password': password, 'user_type': user_type})
+
+    return "User registered successfully."
+
+@app.route('/edit_profile')
+def edit_profile():
+    if 'user' in session:
+        username = session['user']
+        user_info = firebase.get('/users', username)
+
+        if user_info is not None:
+            return render_template('edit_profile.html', user_info=user_info)
+        else:
+            # Handle the case where user_info is None (e.g., user not found)
+            return "User information not found."
+    else:
+        return redirect(url_for('login'))
+
+@app.route('/update_profile', methods=['POST'])
+def update_profile():
+    if 'user' in session:
+        username = session['user']
+        user_info = firebase.get('/users', None)
+
+        # Retrieve updated profile data from the form
+        new_password = request.form['password']
+        new_user_type = request.form['user_type']
+
+        # Update user data in Firebase
+        if user_info and username in user_info:
+            updated_user_info = {
+                'password': new_password,
+                'user_type': new_user_type
+            }
+            firebase.patch('/users/' + username, updated_user_info)
+
+            return redirect(url_for('dashboard'))
+        else:
+            return "User not found in database."
+    else:
+        return redirect(url_for('login'))
+
+def populate_available_heads():
+    heads = firebase.get('/heads', None)
+    available_heads = []
+
+    if heads:
+        for head_name, status in heads.items():
+            if status == "free":
+                available_heads.append(head_name)
+
+    print("Available Heads:", available_heads)
+    return available_heads
+
+@app.route('/create_project', methods=['GET', 'POST'])
+def create_project():
+    if request.method == 'POST':
+        # Retrieve form data
+        project_type = request.form.get('project_type')
+        head = request.form.get('head')
+        theme = request.form.get('theme')
+        description = request.form.get('description')
+
+        # Create data dictionary
+        project_data = {
+            'project_type': project_type,
+            'head': head,
+            'theme': theme,
+            'description': description
+        }
+
+        # Save project data to Firebase
+        firebase.post('/projects', project_data)
+        return redirect(url_for('index'))
+
+    # Populate available heads for the form
+    available_heads = populate_available_heads()
+
+    return render_template('createproject.html', available_heads=available_heads)
+
+@app.route('/submit', methods=['GET', 'POST'])
+def submit():
+    if request.method == 'POST':
+        link_to_file = request.form.get('link_to_file')
+        current_user = session.get('user')  # Get the current user from the session
+
+        if current_user:
+            # Get current datetime
+            now = datetime.now()
+            datetime_str = now.strftime("%Y-%m-%d %H:%M:%S")
+
+            data = {
+                'link_to_file': link_to_file,
+                'current_user': current_user,
+                'datetime': datetime_str
+            }
+
+            # Push the data to Firebase
+            firebase.post('/submissions', data)
+
+            return redirect(url_for('index'))
+
+    return render_template('submit.html')
+
+@app.route('/success')
+def success():
+    return "Submission successful! Thank you." 
 
 if __name__ == '__main__':
     app.run(debug=True)

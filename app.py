@@ -13,7 +13,7 @@ app.secret_key = 'mlqsqQ1PXL55EhfWEzTl9BBaMr4qy5'  # Set your secret key here
 
 firebase = firebase.FirebaseApplication('https://hakctuesx-default-rtdb.firebaseio.com/', None)
 
-@app.route('/send_message', methods=['POST'])
+@app.route('/send_message', methods=['POST', 'GET'])
 def send_message():
     if 'user' in session:
         username = session['user']
@@ -21,23 +21,26 @@ def send_message():
         timestamp = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
 
         # Push the message to Firebase
-        new_message_ref = firebase.post('/chat/messages', {'user': username, 'message': message, 'timestamp': timestamp})
+        new_message_ref = firebase.post('/chat/messages', {'user': username, 'message': message, 'timestamp': timestamp, 'recipient': request.form.get('recipient')})
 
         return redirect(url_for('dashboard'))
     else:
         return redirect(url_for('login'))
-@app.route('/chat')
 
+@app.route('/chat', methods=['POST', 'GET'])
 def chat():
     # Retrieve chat messages from Firebase
     messages = firebase.get('/chat/messages', None)
     if messages is None:
         messages = []
     else:
-        messages = [{'user': message['user'], 'message': message['message']} for message in messages.values()]
+        messages = [{'user': message['user'], 'message': message['message'], 'timestamp': message['timestamp'], 'recipient': message['recipient']} for message in messages.values()]
 
-    # Pass messages to the template and render the chat page
-    return render_template('chat.html', messages=messages)
+    # Get unique recipients
+    recipients = {message['recipient'] for message in messages}
+
+    # Pass messages and recipients to the template and render the chat page
+    return render_template('chat.html', messages=messages, recipients=recipients)
 
 @app.route('/')
 def index():
@@ -277,6 +280,56 @@ def submit():
 @app.route('/success')
 def success():
     return "Submission successful! Thank you." 
+
+@app.route('/chat/<conversation_id>', methods=['GET', 'POST'])
+def chat_conversation(conversation_id):
+    if 'user' in session:
+        if request.method == 'POST':
+            # Get the message from the form
+            message = request.form.get('message')
+            if message:
+                # Get the current user
+                username = session['user']
+                timestamp = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+
+                # Push the message to Firebase under the specified conversation
+                firebase.post(f'/chat/{conversation_id}/messages', {'user': username, 'message': message, 'timestamp': timestamp})
+
+        # Retrieve chat messages for the specified conversation from Firebase
+        messages_data = firebase.get(f'/chat/{conversation_id}/messages', None)
+        messages = []
+        if messages_data:
+            for message_id, message_info in messages_data.items():
+                messages.append({'user': message_info['user'], 'message': message_info['message'], 'timestamp': message_info['timestamp']})
+
+        return render_template('chat_conversation.html', conversation_id=conversation_id, messages=messages)
+    else:
+        return redirect(url_for('login'))
+
+@app.route('/start_conversation/<recipient>', methods=['GET', 'POST'])
+def start_conversation(recipient):
+    if 'user' in session:
+        if request.method == 'POST':
+            # Get the message from the form
+            message = request.form.get('message')
+            if message:
+                # Get the current user
+                sender = session['user']
+                timestamp = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+
+                # Create a new conversation ID
+                conversation_id = f'{sender}_{recipient}_{timestamp}'
+
+                # Push the message to Firebase under the new conversation ID
+                firebase.post(f'/chat/{conversation_id}/messages', {'user': sender, 'message': message, 'timestamp': timestamp})
+
+                # Redirect to the new conversation
+                return redirect(url_for('chat_conversation', conversation_id=conversation_id))
+
+        # Render the template for starting a new conversation
+        return render_template('start_conversation.html', recipient=recipient)
+    else:
+        return redirect(url_for('login'))
 
 if __name__ == '__main__':
     app.run(debug=True)
