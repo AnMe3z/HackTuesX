@@ -1,37 +1,81 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Edit Profile</title>
-    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet"> <!-- Bootstrap CSS -->
-</head>
-<body>
-    <div class="container mt-5">
-        <h1>Edit Profile</h1>
-        <form action="{{ url_for('update_profile') }}" method="post"> <!-- Specify action and method -->
-            <div class="form-group">
-                <label for="username">Username</label>
-                <input type="text" class="form-control" id="username" name="username" value="{{ user_info.username }}" placeholder="Enter your username"> <!-- Populate with current username -->
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Edit Profile</title>
+        <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+        <!-- Bootstrap CSS -->
+        <link rel="stylesheet" href="{{ url_for('static', filename='dashboard.css') }}">
+    </head>
+    <body>
+        <div class="container-fluid">
+            <div class="row">
+                <nav class="col-md-3 col-lg-2 d-md-block bg-light sidebar">
+                    <div class="sidebar-sticky">
+                        <h5 class="sidebar-heading d-flex justify-content-between align-items-center px-3 mt-4 mb-1 text-muted"> Navigation </h5>
+                        <ul class="nav flex-column">
+                            <li class="nav-item">
+                                <a class="nav-link" href="/dashboard">Home</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" href="/edit_profile">Edit Profile</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" href="/heads">Available Heads</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" href="/register">Register</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" href="/login">Switch account</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" href="/chat">Chat</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" href="/create_project">Create project</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" href="/submit">Submit</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" href="/logout">Log out</a>
+                            </li>
+                        </ul>
+                    </div>
+                </nav>
+                <form action="{{ url_for('update_profile') }}" method="post" style="margin-left: 10vh; margin-top: 10vh; width: 50%;">
+                    <!-- Specify action and method -->
+                    <h1>Edit Profile</h1>
+                    <div class="form-group">
+                        <label for="username">Username</label>
+                        <input type="text" class="form-control" id="username" name="username" value="{{ user_info.username }}" placeholder="Enter your username">
+                        <!-- Populate with current username -->
+                    </div>
+                    <div class="form-group">
+                        <label for="password">Password</label>
+                        <input type="password" class="form-control" id="password" name="password" value="{{ user_info.password }}" placeholder="Enter your password">
+                        <!-- Populate with current password -->
+                    </div>
+                    <div class="form-group">
+                        <label for="userType">User Type</label>
+                        <select class="form-control" id="userType" name="user_type">
+                            <option {% if user_info.user_type == 'Student' %} selected {% endif %}>Student</option>
+                            <!-- Populate with current user type -->
+                            <option {% if user_info.user_type == 'Admin' %} selected {% endif %}>Admin</option>
+                            <option {% if user_info.user_type == 'Head' %} selected {% endif %}>Head</option>
+                        </select>
+                    </div>
+                    <button type="submit" class="btn btn-primary">Submit</button>
+                </form>
             </div>
-            <div class="form-group">
-                <label for="password">Password</label>
-                <input type="password" class="form-control" id="password" name="password" value="{{ user_info.password }}" placeholder="Enter your password"> <!-- Populate with current password -->
-            </div>
-            <div class="form-group">
-                <label for="userType">User Type</label>
-                <select class="form-control" id="userType" name="user_type">
-                    <option {% if user_info.user_type == 'Student' %} selected {% endif %}>Student</option> <!-- Populate with current user type -->
-                    <option {% if user_info.user_type == 'Admin' %} selected {% endif %}>Admin</option>
-                    <option {% if user_info.user_type == 'Head' %} selected {% endif %}>Head</option>
-                </select>
-            </div>
-            <button type="submit" class="btn btn-primary">Submit</button>
-        </form>
-    </div>
-
-    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script> <!-- jQuery -->
-    <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.1/dist/umd/popper.min.js"></script> <!-- Popper.js -->
-    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script> <!-- Bootstrap JS -->
-</body>
+        </div>
+        <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+        <!-- jQuery -->
+        <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.1/dist/umd/popper.min.js"></script>
+        <!-- Popper.js -->
+        <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+        <!-- Bootstrap JS -->
+    </body>
 </html>

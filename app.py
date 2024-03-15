@@ -41,10 +41,25 @@ def chat():
 
 @app.route('/')
 def index():
-    if 'user' in session:
-        return redirect(url_for('dashboard'))
-    else:
-        return redirect(url_for('login'))
+    if request.method == 'POST':
+        username = request.form['username']
+        password = request.form['password']
+
+        # Fetch user credentials from Firebase
+        user_data = firebase.get('/users/' + username, None)
+
+        if user_data is not None and password == user_data['password']:
+            # Authentication successful
+            session['user'] = username
+            return redirect(url_for('dashboard'))
+        else:
+            # Authentication failed
+            return render_template('login.html', error='Invalid username or password')
+    return render_template('land.html')
+    #if 'user' in session:
+        #return redirect(url_for('dashboard'))
+    #else:
+        #return redirect(url_for('login'))
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
@@ -61,9 +76,9 @@ def login():
             return redirect(url_for('dashboard'))
         else:
             # Authentication failed
-            return render_template('login.html', error='Invalid username or password')
+            return render_template('land.html', error='Invalid username or password')
 
-    return render_template('login.html')
+    return render_template('land.html')
 
 @app.route('/dashboard')
 def dashboard():

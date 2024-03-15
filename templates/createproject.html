@@ -1,41 +1,74 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Create Project</title>
-    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
-</head>
-<body>
-    <div class="container">
-        <h1>Create Project</h1>
-        <form action="/create_project" method="post">
-            <div class="form-group">
-                <label for="project_type">Project Type:</label>
-                <select class="form-control" id="project_type" name="project_type">
-                    <option value="networking">Networking</option>
-                    <option value="embedded">Embedded</option>
-                    <option value="software">Software</option>
-                </select>
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Create Project</title>
+        <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+        <link rel="stylesheet" href="{{ url_for('static', filename='dashboard.css') }}">
+    </head>
+    <body>
+        <div class="container-fluid">
+            <div class="row">
+                <nav class="col-md-3 col-lg-2 d-md-block bg-light sidebar">
+                    <div class="sidebar-sticky">
+                        <h5 class="sidebar-heading d-flex justify-content-between align-items-center px-3 mt-4 mb-1 text-muted"> Navigation </h5>
+                        <ul class="nav flex-column">
+                            <li class="nav-item">
+                                <a class="nav-link" href="/dashboard">Home</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" href="/edit_profile">Edit Profile</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" href="/heads">Available Heads</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" href="/register">Register</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" href="/login">Switch account</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" href="/chat">Chat</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" href="/create_project">Create project</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" href="/submit">Submit</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" href="/logout">Log out</a>
+                            </li>
+                        </ul>
+                    </div>
+                </nav>
+                <form action="/create_project" method="post" style="margin-left: 10vh; margin-top: 10vh; width: 50%;">
+                    <h1>Create Project</h1>
+                    <div class="form-group">
+                        <label for="project_type">Project Type:</label>
+                        <select class="form-control" id="project_type" name="project_type">
+                            <option value="networking">Networking</option>
+                            <option value="embedded">Embedded</option>
+                            <option value="software">Software</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="head">Select Head:</label>
+                        <select class="form-control" id="head" name="head"> {% for head in available_heads %} <option value="{{ head }}">{{ head }}</option> {% endfor %} </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="theme">Theme:</label>
+                        <input type="text" class="form-control" id="theme" name="theme">
+                    </div>
+                    <div class="form-group">
+                        <label for="description">Description:</label>
+                        <textarea class="form-control" id="description" name="description" rows="5" placeholder="Enter project description"></textarea>
+                    </div>
+                    <button type="submit" class="btn btn-primary">Submit</button>
+                </form>
             </div>
-            <div class="form-group">
-                <label for="head">Select Head:</label>
-                <select class="form-control" id="head" name="head">
-                    {% for head in available_heads %}
-                        <option value="{{ head }}">{{ head }}</option>
-                    {% endfor %}
-                </select>
-            </div>
-            <div class="form-group">
-                <label for="theme">Theme:</label>
-                <input type="text" class="form-control" id="theme" name="theme">
-            </div>
-            <div class="form-group">
-                <label for="description">Description:</label>
-                <textarea class="form-control" id="description" name="description" rows="5" placeholder="Enter project description"></textarea>
-            </div>
-            <button type="submit" class="btn btn-primary">Submit</button>
-        </form>
-    </div>
-</body>
+        </div>
+    </body>
 </html>

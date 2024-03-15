@@ -1,0 +1,18 @@
+.container-fluid,
+.sidebar,
+.main-content {
+    height: 100vh;
+}
+.taskprim {
+    border: 1px solid #ccc;
+    padding: 10px;
+    margin-bottom: 10px;
+    width: 90%;
+}
+.taskprim {
+    border: 1px solid #ccc;
+    padding: 10px;
+    margin-bottom: 10px;
+    width: 90%; /* Adjust the width as needed */
+    margin-right: 50px;
+}
