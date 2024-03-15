@@ -1,27 +1,25 @@
-from flask import Flask, request, redirect, url_for, render_template
-import pyrebase
+from flask import Flask, request,render_template
+from firebase import firebase
 
-config = {
-    "apiKey": "AIzaSyDY4DLLc_fhTTNqdgpVtRRempnbJzxzob4",
-     "authDomain": "hakctuesx.firebaseapp.com",
-    "databaseURL": "https://hakctuesx-default-rtdb.firebaseio.com/",
-    "storageBucket": "hakctuesx.appspot.com",
-}
-
-firebase = pyrebase.initialize_app(config)
-storage = firebase.storage()
 
 app = Flask(__name__)
+import re
+def is_google_docs_link(link):
+    pattern = r'(https?://)?(www\.)?docs\.google\.com/document/d/[a-zA-Z0-9-_]+'
+    return bool(re.match(pattern, link))
+firebase = firebase.FirebaseApplication("https://hakctuesx-default-rtdb.firebaseio.com/", None)
 
-@app.route('/submit', methods=['GET', 'POST'])
-def index():
-    if request.method == 'POST':
-        upload = request.files['upload']
-        storage.child("files/" + upload.filename).put(upload)
-
-        return redirect(url_for('/'))
-
-    return render_template('submit.html')
+@app.route('/upload_link', methods=['POST','GET'])
+def upload_link():
+    if request.method=='POST':
+        link = request.form.get('link')
+        if is_google_docs_link(link):
+            firebase.post('/files',link)
+            return 'fileisintrue'
+        else:
+            return 'No link has been uploaded'
+    elif request.method=='GET':
+            return render_template("upload_link.html")
 
 if __name__ == '__main__':
     app.run(debug=True)
