@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Task Dashboard</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <div class="container">
+        <div class="sidebar">
+            <h2>Navigation</h2>
+            <!-- Add your navigation links here -->
+            <ul>
+                <li><a href="/">Home</a></li>
+                <li><a href="/edit_profile">Profile</a></li>
+                <li><a href="/heads">Available Heads</a></li>
+                <li><a href="/register">Register</a></li>
+                <li><a href="/login">Log in</a></li>
+                <li><a href="/logout">Log out</a></li>
+            </ul>
+        </div>
+        <div class="main-content">
+            <h1>Task Dashboard</h1>
+            <ul class="task-list">
+                {% for task in tasks %}
+                    <li>
+                        <div>{{ task.description }} - Deadline: {{ task.deadline }}</div>
+                        <!-- Add timeline for checkpoints -->
+                        <ul class="timeline">
+                            {% for checkpoint in task.checkpoints %}
+                                <li>{{ checkpoint.date }} - {{ checkpoint.description }}</li>
+                            {% endfor %}
+                        </ul>
+                    </li>
+                {% endfor %}
+            </ul>
+            <form action="{{ url_for('add_task') }}" method="post">
+                <input type="text" name="task_name" placeholder="Enter task name"> <!-- Input field for task name -->
+                <input type="text" name="description" placeholder="Enter task description"> <!-- Input field for description -->
+                <input type="date" name="deadline" placeholder="Enter deadline">
+                <input type="text" name="assignee" placeholder="Enter assignee">
+                <button type="submit">Add Task</button>
+            </form>
+            <form action="{{ url_for('clear_tasks') }}" method="post">
+                <button type="submit">Clear All Tasks</button>
+            </form>
+            <div id="calendar">
+                <h2>Calendar</h2>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Sun</th>
+                            <th>Mon</th>
+                            <th>Tue</th>
+                            <th>Wed</th>
+                            <th>Thu</th>
+                            <th>Fri</th>
+                            <th>Sat</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for week in calendar %}
+                            <tr>
+                                {% for day, tasks in week %}
+                                    <td>
+                                        {% if day %}
+                                            <div>{{ day }}</div>
+                                            <ul>
+                                                {% for task in tasks %}
+                                                    <li>{{ task['description'] }}</li>
+                                                {% endfor %}
+                                            </ul>
+                                        {% endif %}
+                                    </td>
+                                {% endfor %}
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        <div class="profile">
+            <h2>Profile</h2>
+            <!-- Display the current user's information -->
+            <p>Name: {{ current_user }}</p>
+            <!-- Display the current user's type -->
+            <p>Type: {{ user_type }}</p>
+            <!-- You can add more profile data here if needed -->
+        </div>        
+        <div class="chat">
+            <h2>Chat</h2>
+            <div class="chat-box">
+                <!-- Display chat messages here -->
+                {% for message in messages %}
+                    <p><strong>{{ message.user }}</strong>: {{ message.message }}</p>
+                {% endfor %}
+            </div>
+            <form action="{{ url_for('send_message') }}" method="post">
+                <input type="text" name="message" placeholder="Type your message...">
+                <button type="submit">Send</button>
+            </form>
+        </div>        
+    </div>
+</body>
+</html>

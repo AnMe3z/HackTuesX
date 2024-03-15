@@ -1,0 +1,16 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Heads</title>
+</head>
+<body>
+    <h1>Heads</h1>
+    <ul>
+        {% for head in heads %}
+            <li>{{ head.name }} - {% if head.status == "free" %}Available{% else %}Unavailable{% endif %}</li>
+        {% endfor %}
+    </ul>
+</body>
+</html>
